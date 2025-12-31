@@ -308,5 +308,15 @@
     "crumbs": [
       "Models"
     ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "Brought to you by the Tandy Center for Ocean Forecasting at Bigelow Laboratory for Ocean Science and Colby College.\n\n1 Contacts\nDr. Nick Record\nBen Tupper\nRaising questions or issues: If you have a question, start a new “issue” on the github issues tab. If a question has been posed by another, and you think you can help with the answer then please feel free to respond.\n\n\n2 Website\nWe build the website using quarto which is perfect from transforming [RMarkdown](https://rmarkdown.rstudio.com/ pages into a website with minimal investment. See this wiki page if you would like to add your work to you own fork of the class repository.\n\n\n3 Acknowledgments\nOur thanks to Omi Johnson and Kyle Oliveira for very welcome guidance on using Tidymodels.\n\n\n4 Data sources\nOur thanks to OBIS for assembling, curating and distributing a remarkable database of species occurences.\nOur thanks to Natural Earth for assembling, curating and distributing a remarkable database of geophysical features.\nOur thanks to the contributors and authors of Gulf of Maine 2050: Visioning Regional Resilience and Sustainability for making their work available.\nOur thanks to hundreds of authors and contributors of R packages who make their work freely available so that we may advance our own work.\n\n\n\n\n Back to top",
+    "crumbs": [
+      "About"
+    ]
   }
 ]
