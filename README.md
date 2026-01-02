@@ -74,7 +74,9 @@ forecasts, to understanding the complexities of forecasts’ impacts.
 
 - Reading assignment for next time: The Gulf of Maine articles in this
   [folder](https://github.com/BigelowLab/ColbyForecasting/tree/main/reading/Woodard)
-
+  And this paper [Pershing
+  2020](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Pershing.elementa.2020.00076.pdf)
+  and 
 ### 2. Thurs Jan 8
 
 - Lecture: Ocean Science / Gulf of Maine Primer
@@ -143,9 +145,7 @@ Day](https://en.wikipedia.org/wiki/Martin_Luther_King_Jr._Day)
 
 - R Tutorial: Spillover and catch-up
 
-- Reading assignment for next time: [(a) Pershing
-  2020](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Pershing.elementa.2020.00076.pdf)
-  and [(b) Hobday
+- Reading assignment for next time: [Hobday
   2020](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Hobday2020.pdf)
 
 ## 7. Thursday Jan 27 [Project presentations](https://github.com/BigelowLab/ColbyForecasting/blob/main/assignments/presentation.md)
