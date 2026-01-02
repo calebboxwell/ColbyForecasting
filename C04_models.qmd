@@ -318,4 +318,6 @@ We have built 4 types of models using tools from the [tidymodels universe](https
 
 # Coding Assignment
 
+::: {.callout-note appearance="simple"}
 
+:::

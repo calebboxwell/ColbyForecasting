@@ -90,50 +90,123 @@ predict_stars = function(x, newdata,
     bind_attrs()
 }
 
+threshold_prediction = function(x, threshold = 0.5){
+  
+  #' Threshold a prediction map
+  #' 
+  #' @param x stars, a stars prediction map (habitat suitability index)
+  #' @param threshold numeric, values in x at or above this value are considered
+  #'   to be predicted presences
+  #' @return a stars object with habitat suitability index converted to a binary class
+  
+  x |>
+    dplyr::mutate(dplyr::across(dplyr::everything(),
+                               ~factor(.x >= threshold[1],
+                                       levels = c(FALSE, TRUE, NA),
+                                       labels = c("abscence", "presence", "land"),
+                                       exclude = NULL)))
+}
 
-write_prediction = function(x, filename = "prediction.tif",
-                            attr = ".pred_presence"){
-  #' Save a prediction (or a time series of predictions)
+plot_prediction = function(x,
+                             colors = c("magma",
+                                        "inferno",
+                                        "plasma",
+                                        "viridis",
+                                        "cividis",
+                                        "rocket",
+                                        "mako",
+                                        "turbo")[1],
+                             coast = read_coastline(),
+                             coast_color = "white"){
+  
+  #' Plot a single stars attribute (variable) over many months
+  #' 
+  #' @param x stars object with one or more months along the 'month' dimension
+  #' @param colors str the name of the color table to use.  See 
+  #'  details here https://ggplot2-book.org/scales-colour.html#sec-colour-continuous.
+  #'  This is ignored is the data type is not numeric.
+  #' @param coast sf coast line or NULL to skip
+  #' @return a ggplot2 object
+  
+  if (inherits(x[[1]][1], "numeric")){
+    cat("numeric\n")
+    gg = ggplot2::ggplot() +
+      stars::geom_stars(data = x[1]) + 
+      ggplot2::scale_fill_viridis_c(option = colors[1], 
+                                    limits = c(0,1), 
+                                    na.value = "grey50") + 
+      ggplot2::coord_sf(crs = sf::st_crs(x)) + 
+      ggplot2::facet_wrap(~month)
+  } else {
+    gg = ggplot2::ggplot() +
+      stars::geom_stars(data = x[1]) + 
+      #ggplot2::scale_fill_hue(na.value = "grey50") + 
+      ggplot2::scale_fill_viridis_d() + 
+      ggplot2::coord_sf(crs = sf::st_crs(x)) + 
+      ggplot2::facet_wrap(~month)
+  }
+  if (!is.null(coast)) {
+    gg = gg + 
+      ggplot2::geom_sf(data = sf::st_geometry(coast), color = coast_color)
+  } else {
+    gg = gg + 
+      ggplot2::coord_sf(crs = sf::st_crs(x))
+  }
+  gg
+}
+
+write_prediction = function(x, 
+                            scientificname = "Mola mola",
+                            version = "v1",
+                            year = "CURRENT",
+                            scenario = "CURRENT",
+                            path = data_path("predictions")){
+  
+  #' Save a prediction to file
   #' 
   #' @param x stars object with one or more time layers
-  #' @param filename chr, the name of the file to write
-  #' @param attr chr or num, either the positional index or attribute name to write.
+  #' @param scientificname chr, the name of the species
+  #' @param version chr, the version identifier
+  #' @param year chr, one of CURRENT, 2055 or 2075
+  #' @param scenario chr, one of CURRENT, RCP45 or RCP85
+  #' @param path chr the data path
   #' @return the input object x (suitable for piping)
   
   stopifnot(inherits(x, "stars"))
+  path = make_path(path)
   
-  stars::write_stars(x[attr], filename)
-  
+  filename = sprintf("%s-%s-%s-%s.rds",
+                     gsub(" ", "_", scientificname, fixed = TRUE),
+                     version[1],
+                     year[1],
+                     scenario[1])
+  saveRDS(x, file.path(path, filename))
+  x
 }
 
 
-read_prediction = function(x, filename = "prediction.tif",
-                            attr = ".pred_presence"){
-  #' Read a prediction (or a time series of predictions)
+read_prediction = function(x,
+                           scientificname = "Mola mola",
+                           version = "v1",
+                           year = "CURRENT",
+                           scenario = "CURRENT",
+                           path = data_path("predictions")){
+  #' Read a prediction from file
   #' 
-  #' @param filename chr, the name of the file to write
-  #' @param attr chr or num, either the positional index or attribute name to write.
+  #' @param x stars object with one or more time layers
+  #' @param scientificname chr, the name of the species
+  #' @param version chr, the version identifier
+  #' @param year chr, one of CURRENT, 2055 or 2075
+  #' @param scenario chr, one of CURRENT, RCP45 or RCP85
+  #' @param path chr the data path
   #' @return the input object x (suitable for piping)
   
-  stopifnot(inherits(x, "stars"))
-  
-  stars::write_stars(x[attr], filename)
-  
-}
-
-read_prediction = function(filename, attr = '.pred_presence', time = NULL){
-  #' Read a prediction (or a time series of predictions)
-  #' 
-  #' @param file chr, the name of the file to write
-  #' @param attr chr the name to apply to the attribute
-  #' @param time any type, an optional "time" to apply the the third dimension for a 
-  #'   mutil-layer array
-  #' @return stars object
-  
-  x = stars::read_stars(filename) |>
-    setNames(attr)
-  if (length(dim(x) > 2) %% !is.null(time)) {
-    x = stars::st_set_dimensions(x, 3, values = time, names = "time")
-  }
-  return(x)
+  filename = file.path(path,
+                       sprintf("%s-%s-%s-%s.rds",
+                               gsub(" ", "_", scientificname, fixed = TRUE),
+                               version[1],
+                               year[1],
+                               scenario[1]))
+  if (!file.exists(filename)) stop("file not found: ", filename)
+  readRDS(filename)
 }

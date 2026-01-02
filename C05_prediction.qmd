@@ -17,122 +17,75 @@ source("setup.R")
 
 # Load the Brickman data
 
-Once again, we'll use the August data. We are going to make a prediction about the present, which means it something akin to a [nowcast](https://en.wikipedia.org/wiki/Nowcasting_(economics)). 
+We are going to make a prediction about the present, which means it something akin to a [nowcast](https://en.wikipedia.org/wiki/Nowcasting_(economics)). 
 
 ```{r load_covar}
-cfg = read_configuration(version = "Aug", path = data_path("models"))
+cfg = read_configuration(scientificname = "Mola mola",
+                         version = "v1", 
+                         path = data_path("models"))
 db = brickman_database()
-covars = read_brickman(db |> filter(scenario == "PRESENT", interval == "mon")) |>
-  select(all_of(cfg$keep_vars)) |>
-  slice("month", "Aug") 
+db = brickman_database()
+present_conditions = read_brickman(db |> filter(scenario == "PRESENT", 
+                                                interval == "mon"),
+                       add = c("depth", "month")) |>
+  select(all_of(cfg$keep_vars))
 ```
 
 # Load the workflow
 
-We read the recipe and model workflow bundle.
+We read the model information we created last time.
 
 ```{r load_workflow}
-wflow = read_workflow(version = cfg$version, type = "rand_forest")
+model_fits = read_model_fit(filename = "Mola_mola-v1-model_fits")
+model_fits
 ```
 
-Recall that the workflow is a container that has has two elements: pre-processing recipe and model.  When we make a prediction with the workflow it will accept new data that then gets filtered and/or transformed as specified by the recipe steps. The data that survives the preprocessing will then be used to feed into the model that was trained on a specific domain (time and space).
 
 # Make a prediction
 
-First we shall make a "nowcast" which is just a prediction of the current environmental conditions.
+First we shall make a "nowcast" which is just a prediction of the current environmental conditions. 
 
 ## Nowcast
 
-First make the prediction using `predict_stars()`.  The function yields a `stars` array object that has three attributes: `.pred_presence`, `.pred_background` and `.pred`.  The leading dot simply gives us the heads up that these three values are all computed. The first two range from 0-1 which implies a probability.  The last, `.pred`, is the class label we would assign if we accept that any `.pred_presence >= 0.5` should be considered suitable habitat where a **reported observation** might occur.
-
+First make the prediction using `predict_stars()`.  The function yields a `stars` array object that has one attribute (variable) for each row in the `model_fits` table. We simply provide the covariates (predictor variables) and the fu nction takes care of the rest.
 
 ```{r nowcast}
-nowcast = predict_stars(wflow, covars)
+nowcast = predict_stars(model_fits, present_conditions)
 nowcast
 ```
-Now we can plot what is often called a "habitat suitability index" (hsi) map.
+Now we can plot what is often called a "habitat suitability index" (hsi) map. We can 
 
-```{r plot_nowcast}
-coast = read_coastline()
-plot(nowcast['.pred_presence'], main = "Nowcast August", 
-     axes = TRUE, breaks = seq(0, 1, by = 0.1), reset = FALSE)
-plot(coast, col = "orange", lwd = 2, add = TRUE)
+```{r plot_nowcast_maxent, warning = FALSE}
+plot_prediction(nowcast['default_btree'])
 ```
 
-We can also plot a presence/background labeled map, but keep in mind it is just a thresholded version of the above where "presence" means `.pred_presence >= 0.5`.
+We can also plot a presence/absence labeled map, but keep in mind it is just a thresholded version of the above where "presence" means `prediction >= 0.5`. Of course, you can select other values to threshold the habitat suitablility scores.
 
-```{r plot_class_labels}
-plot(nowcast['.pred'], main = "Nowcast August Labels", 
-     axes = TRUE, reset = FALSE)
-plot(coast, col = "black", lwd = 2, add = TRUE)
+```{r plot_class_labels, warning = FALSE}
+pa_nowcast = threshold_prediction(nowcast)
+plot_prediction(pa_nowcast['default_btree'])
 ```
 
 ## Forecast
 
 Now let's try our hand at forecasting - let's try RCP85 in 2075.  First we load those parameters, then run the prediction and plot.
 
-```{r load_2075_RCP85}
+```{r load_2075_RCP85, warning = FALSE}
 covars_rcp85_2075 = read_brickman(db |> filter(scenario == "RCP85", 
                                                year == 2075, 
-                                               interval == "mon")) |>
-  select(all_of(cfg$keep_vars)) |>
-  slice("month", "Aug") 
+                                               interval == "mon"),
+                                  add = c("depth", "month")) |>
+  select(all_of(cfg$keep_vars))
 ```
 
 ```{r forecast}
-forecast_2075 = predict_stars(wflow, covars_rcp85_2075)
+forecast_2075 = predict_stars(model_fits, covars_rcp85_2075)
 forecast_2075
 ```
 
 ```{r plot_forecast}
-coast = read_coastline()
-plot(forecast_2075['.pred_presence'], main = "RCP85 2075 August", 
-     axes = TRUE, breaks = seq(0, 1, by = 0.1), reset = FALSE)
-plot(coast, col = "orange", lwd = 2, add = TRUE)
+plot_prediction(forecast_2075['default_btree'])
 ```
-Hmmm, that's pretty different than what the nowcast predicts.
-
-# Time series
-
-It would be nice to see a time series: current, 2055 and 2075 on the same graphic. Let's load RCP85 2055 data, and make yet another prediction.
-
-## Forecast 2055
-```{r load_2055_RCP85}
-covars_rcp85_2055 = read_brickman(db |> filter(scenario == "RCP85", year == 2055, interval == "mon")) |>
-  select(all_of(cfg$keep_vars)) |>
-  slice("month", "Aug") 
-forecast_2055 = predict_stars(wflow, covars_rcp85_2055)
-forecast_2055
-```
-
-## Bind time series
-
-We want to bind the `.pred_presence` attribute for each of the predictions (nowcast, forecast_2055 and forecast_2075).  Let's assume the "present" mean 2020 so we can assign a year.
-
-```{r bind}
-rcp85 = c(nowcast, 
-          forecast_2055, forecast_2075, 
-          along = list(year = c("2020", "2055", "2075")))
-```
-:::{.callout-note}
-Curious about why we provide year as a vector of characters instead of a vector of integers?  Try running the command above again but this time using `along = list(year = c(2020, 2055, 2075))` (as numbers not strings). Then check out the 3rd dimension.
-:::
-
-
-Since we are plotting multiple arrays, we need to plot the coastline using a "hook" function.
-
-```{r plot_hsi_series}
-plot_coast = function(){
-  plot(coast, col = "orange", lwd = 2, add = TRUE)
-}
-
-plot(rcp85['.pred_presence'], 
-     hook = plot_coast,
-     axes = TRUE, breaks = seq(0, 1, by = 0.1), join_zlim  = TRUE, reset = FALSE)
-```
-
-Hmmmm. Why does there seem to be a strong shift between 2020 and 2055, while the 2055 to 2075 shift seems less pronounced? 
-
 
 
 :::{.callout-note}
@@ -141,28 +94,30 @@ Don't forget that [there are other ways](https://github.com/BigelowLab/ColbyFore
 
 ## Save the predictions
 
-We could save all three attributes, but `.pred_background` is just `1 - .pred_presence`, and `.pred` is just coding "presence" where `.pred_presence >= 0.5`, so we can always compute those as needed if we have `.pred_presence`.  In that case, let's just save the first attribute, `.pred_presence`, in a multilayer [GeoTIFF](https://en.wikipedia.org/wiki/GeoTIFF) formatted image array file.  The `write_prediction()` function will do just that.
+It's easy to save the predicitions (and read then back with `read_prediction()`).
 
 ```{r save_pred}
 # make sure the output directory exists
-path = data_path("predictions")
-if (!dir.exists(path)) ok = dir.create(path, recursive = TRUE)
+path = make_path("predictions")
 
-# write individual arrays?
-write_prediction(nowcast, file = file.path(path,"Aug-rand_forest-RCP85-2020.tif"))
-write_prediction(forecast_2055, file = file.path(path, "Aug-rand_forest-RCP85-2055.tif"))
-write_prediction(forecast_2075, file = file.path(path, "Aug-rand_forest-RCP85-2075.tif"))
-
-# or write them together in a "multi-layer" file?
-write_prediction(rcp85, file = file.path(path, "Aug-rand_forest-RCP85-all.tif"))
+write_prediction(nowcast,
+                 scientificname = cfg$scientificname,
+                 version = cfg$version,
+                 year = "CURRENT",
+                 scenario = "CURRENT")
+write_prediction(forecast_2075,
+                 scientificname = cfg$scientificname,
+                 version = cfg$version,
+                 year = "2075",
+                 scenario = "RCP85")
 ```
-
-To read it back simply provide the filename to `read_prediction()`.  If you are reading back a multi-layer array, be sure to check out the `time` argument to assign values to the time dimension.  Single layer arrays don't have the concept of time so the `time` argument is ignored.
 
 # Recap
 
-We made both a nowcast and a number predictions using a previously saved workflow. Contrary to Yogi Berra's claim, it's actually pretty easy to predict the future.  Perhaps more challenging is to interpret the prediction.  We bundled these together to make time series plots, and we saved the `.pred_presence` values.
+We made both a nowcast and a number predictions using a previously saved workflow. Contrary to Yogi Berra's claim, it's actually pretty easy to predict the future.  Perhaps more challenging is to interpret the prediction.  We bundled these together to make time series plots, and we saved the predicted values.
 
 # Coding Assignment
 
-For each each climate scenario create a monthly forecast (so that's three: nowcast, forecast_2055 and forecast_2075) and save each to in your `predictions` directory. Keep in mind that some months may not have enough data to model without throwing an error.  We suggest that you wrap your critical steps in a `try()` function which will catch the error without crashing your iterator. There is a tutorial on [error catching](https://bigelowlab.github.io/handytandy/try.html) that specifically uses `try()`.
+::: {.callout-note appearance="simple"}
+For each each climate scenario create a monthly forecast (so that's three time periods: PRESENT, 2055 and 2075 and three scenarios CURRENT, RCP45, RCP85) and save each to in your `predictions` directory.  In the end you should have 5 files saved (one for PRESENT and two each for 2055 and 2075).
+:::

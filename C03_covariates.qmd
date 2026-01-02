@@ -166,3 +166,6 @@ We loaded the covariates for the "PRESENT" climate scenario and looked at collin
 
 # Coding Assignment C03
 
+::: {.callout-note appearance="simple"}
+
+:::
