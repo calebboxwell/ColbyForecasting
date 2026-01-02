@@ -76,7 +76,7 @@ forecasts, to understanding the complexities of forecasts’ impacts.
   [folder](https://github.com/BigelowLab/ColbyForecasting/tree/main/reading/Woodard)
   And this paper [Pershing
   2020](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Pershing.elementa.2020.00076.pdf)
-  and 
+  
 ### 2. Thurs Jan 8
 
 - Lecture: Ocean Science / Gulf of Maine Primer
