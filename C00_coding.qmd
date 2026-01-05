@@ -46,7 +46,7 @@ Now we are ready to load some data into your R session.
 
 ## Spatial data
 
-Spatial data is any data that has been assigned to a location on a planet (or even between planets!); that means environmental data is mapped to locations on oblate spheroids (like Earth). The oblate spheroid shape presents interesting but challenging math to the data scientist. Modern spatial data is designed to make data science easier by handling all of the location information in a discrete and standardized manner. By discrete we mean that we don't have to sweat the details.
+Spatial data is any data that has been assigned to a location on a planet (or even between planets!); that means environmental data is mapped to locations on oblate spheroids (like Earth). The oblate spheroid shape presents interesting but challenging math to the data scientist. Modern spatial data is designed to make data science easier by handling all of the location information in a discrete/discreet and standardized manner. By `discrete` we mean that the spatial data is separated from your own data. We can also say that it is `discreet` because it is unobstrusive; it just tags along for the ride. That duality is likely the closest you'll get to data science humor!  Haha!
 
 ### Point data
 
