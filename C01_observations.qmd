@@ -25,7 +25,7 @@ As always, we start by running our setup function. Start RStudio/R, and relaod y
 
 ```{r source_setup, warning = FALSE}
 source("setup.R")
-SPECIES = "Mola mola"
+SPECIES = "Clupea harengus"
 ```
 
 # Observations
@@ -115,7 +115,7 @@ Well now one has to wonder about a single observation of 25 animals. Let's check
 
 ```{r obs_indcount_25}
 obs |>
-  filter(individualCount == 25) |>
+  filter(individualCount == 12388) |>
   browse_obis()
 ```
 
@@ -235,3 +235,4 @@ As you build your function, pause every so often and run the following to test t
 source("setup.R")
 obs = read_observations()
 ```
+

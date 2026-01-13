@@ -1,5 +1,4 @@
-
-read_observations = function(scientificname = "Mola mola",
+read_observations = function(scientificname = "Clupea harengus",
                              minimum_year = 1970, 
                              ...){
   
@@ -17,11 +16,27 @@ read_observations = function(scientificname = "Mola mola",
   x = read_obis(scientificname, ...) |>
     dplyr::mutate(month = factor(month, levels = month.abb))
   
-  # if the user provided a non-NULL filter by year
+  # eventDate must exist! Otherwise I can't say how variables affect it in time
+  x = x |>
+    dplyr::filter(!is.na(eventDate))
+  
+  # individual count must exist
+  x = x |>
+    dplyr::filter(!is.na(individualCount))
+  
+  # if the user provided a non-NULL filter by year (caleb: I don't fully understand how this works)
   if (!is.null(minimum_year)){
     x = x |>
       filter(year >= minimum_year)
   }
+  
+  # spatial filter
+  db = brickman_database() |>
+    filter(scenario == "STATIC", var == "mask")
+  mask = read_brickman(db)
+  hitOrMiss = extract_brickman(mask, x)
+  x = x |>
+    filter(!is.na(hitOrMiss$value))
   
   return(x)
 }
