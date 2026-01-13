@@ -71,9 +71,6 @@ This schedule has built in flexibility. Changes will be noted.
 
 - Lecture: Forecasting Introduction
 
-- R Tutorial:
-  [Coding](https://bigelowlab.github.io/ColbyForecasting/C00_coding.html)
-
 - Reading assignment for next time: The Gulf of Maine articles in this
   [folder](https://github.com/BigelowLab/ColbyForecasting/tree/main/reading/Woodard)
   And this paper [Pershing
@@ -85,20 +82,20 @@ This schedule has built in flexibility. Changes will be noted.
 - Lecture: Ocean Science / Gulf of Maine Primer
 
 - Discussion: [Forecast
-  cards](https://docs.google.com/spreadsheets/d/1gPwJF2XAKD9WftHAgRY9X_CXpn-S0gQFDZeF7yxdIGo/edit?gid=0#gid=0)
+  cards](https://docs.google.com/spreadsheets/d/19dHtW6VxCXAzko9deqdjYOKp_4KQO96rSsBxxxeN8Yc/edit?gid=0#gid=0)
   and [Table 1 in this
   paper](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/RecordEtal2025inreview.pdf)
 
 - R Tutorial:
+  [Coding](https://bigelowlab.github.io/ColbyForecasting/C00_coding.html)
+
+- R Tutorial:
   [Observations](https://bigelowlab.github.io/ColbyForecasting/C01_observations.html)
 
-- Reading assignment for next time: [Ross 2021](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Ross2021.pdf)
-[Briscoe 2022](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Briscoe2022.pdf)
+- Reading assignment for next time: Monday we have a panel with three early career scientists who work on forecasting. Each will give a presentation of their work. You assignment is to read these papers ahead of time and to ask at least one question during the question session.[Ross 2021](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Ross2021.pdf)
+[Helmuth 2002](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Helmuth2002.pdf)
 [Mollomo
   1998](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Mollomo1998.pdf)
-
-- R Tutorial: [Background
-  Points](https://bigelowlab.github.io/ColbyForecasting/C02_background.html)
 
 ### 3. Monday Jan 12
 
@@ -106,14 +103,18 @@ This schedule has built in flexibility. Changes will be noted.
 
 - Discussion: Where does our data come from?
 
-- Reading assignment for next time: [Brickman
+- Reading assignment for next time:  [Brickman
   2020](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Brickman.elementa.2020.20.00055.pdf)
 
 ## 4. Tuesday Jan 13
 
 - Lecture: Forecasting Methodologies
 
-- Discussion: Forecasting unintended consequences
+- Discussion: [Data sources](https://docs.google.com/presentation/d/1PpfSl6OvxwIxgT1FKNLdmkDN_NPAM1BXypjVqHkhvxo/edit?slide=id.p#slide=id.p)
+  [Signup](https://docs.google.com/spreadsheets/d/1f5NuX2NZzx7QNLqc7Td1TvKZ_TO9Y4yHiwl3zuVqFVA/edit?gid=0#gid=0)
+
+- R Tutorial: [Background
+  Points](https://bigelowlab.github.io/ColbyForecasting/C02_background.html)
 
 - R Tutorial:
   [Covariates](https://bigelowlab.github.io/ColbyForecasting/C03_covariates.html)
@@ -128,6 +129,8 @@ This schedule has built in flexibility. Changes will be noted.
 ## 5. Thursday Jan 15
 
 - Lecture: Algorithm Accountability
+
+- Discussion: Forecasting unintended consequences
 
 - R Tutorial:
   [Modeling](https://bigelowlab.github.io/ColbyForecasting/C04_models.html)

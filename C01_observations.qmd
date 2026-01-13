@@ -221,7 +221,7 @@ We have explored a data set, in particular for *Mola mola*; your species may pre
 
 We went through many steps to filter out records that won't help use model.  We'll need that filtered data many-many-many times in the days ahead.  Wouldn't it be nice if we could sweep all of those filtering steps into a single function, call it `read_observations()`, that simple took care of it all for us?  Yes - that would be really nice!
 
-Open the "read_observations.R" file you'll find in the "functions" directory. We have started it for you. Edit the function so that it appropriately filters your species data set by adding optional arguments (like `minimum_year` has been added).  And then adding the code steps needed to implement that filter.
+Open the "observations.R" file you'll find in the "functions" directory. We have started it for you. Edit the function so that it appropriately filters your species data set by adding optional arguments (like `minimum_year` has been added).  And then adding the code steps needed to implement that filter.
 
 Not every filter needs user input.  For instance, `eventDate` can't be `NA`, and all points must fall within the area covered by the Brickman data. So you can automatically add those filters without any user options. 
 
