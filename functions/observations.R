@@ -38,5 +38,33 @@ read_observations = function(scientificname = "Clupea harengus",
   x = x |>
     filter(!is.na(hitOrMiss$value))
   
+  # temporal filter - to fine tune the range
+  obs = obs |>
+    filter(year >= 1983 & year <= 2013)
+  dim(obs)
+  
+  # plot observation counts per year
+  ggplot(data = obs,
+         mapping = aes(x = year)) + 
+    geom_bar() + 
+    geom_vline(xintercept = c(1983, 2013), linetype = "dashed") + 
+    labs(title = "Counts per year")
+  
+  # plot counts per month
+  obs = obs |>
+    mutate(month = factor(month, levels = month.abb))
+  
+  ggplot(data = obs,
+         mapping = aes(x = month)) + 
+    geom_bar() + 
+    labs(title = "Counts per month")
+  
+  # plot points on mask of the Gulf of Maine
+  db = brickman_database() |>
+    filter(scenario == "STATIC", var == "mask")
+  mask = read_brickman(db)
+  plot(mask, breaks = "equal", axes = TRUE, reset = FALSE)
+  plot(st_geometry(obs), pch = ".", add = TRUE)
+  
   return(x)
 }
