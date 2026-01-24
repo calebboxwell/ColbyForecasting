@@ -154,6 +154,7 @@ ggplot() +
   labs(x = "Longitude", y = "Latitude", title = "Bias map using all observations")
 ```
 ![](assignments/C03_assignment_files/figure-gfm/plots-1.png)
+
 ``` r
 # plot to visualize the location of points
 ggplot() +
