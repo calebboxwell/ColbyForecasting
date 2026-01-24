@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 C03_assignment
 ================
 
@@ -18,20 +19,45 @@ following code chunk, I run ‘fetch_obis(SPECIES)’ in the console to
 download the species data from Obis.
 
 ``` r
+=======
+---
+title: "C03_assignment"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Species
+
+For my backup species I have chosen Harbor seals (*Phoca vitulina*) because they are a predator of Atlantic herring (*Clupea harengus*). There also have observations for each month, which is something that the Atlantic herring don't have in January, June, and December. Finally, while the total number of filtered harbor seal observations is less than that of Atlantic herring, the seal's distribution across the Gulf of Maine is decent.
+
+## Code
+
+This code sets the working directory and the source. After running the following code chunk, I run 'fetch_obis(SPECIES)' in the console to download the species data from Obis.
+```{r source_setup, warning = FALSE}
+>>>>>>> 2fbfc9a16542efd0a557cd080c0f462851e4d51f
 source("/home/cjboxw26/ColbyForecasting/setup.R")
 SPECIES = "Phoca vitulina"
 ```
 
+<<<<<<< HEAD
 After setting up R and downloading the data, I read in all historic
 harbor seal observations using the observations.R function.
 
 ``` r
+=======
+After setting up R and downloading the data, I read in all historic harbor seal observations using the observations.R function.
+```{r call observations.R for Harbor seals}
+>>>>>>> 2fbfc9a16542efd0a557cd080c0f462851e4d51f
 obs = read_obis(SPECIES)
 obs = read_observations(
   scientificname = "Phoca vitulina"
   )
 ```
 
+<<<<<<< HEAD
 The next step is to load the shoreline mask and covariates from the
 brickman database. The purpose of the mask is to ensure that all
 observations are coming from the Gulf of Maine, and the covariates will
@@ -39,6 +65,11 @@ eventually be used to predict what harbor seal distribution looks like
 in 2050.
 
 ``` r
+=======
+The next step is to load the shoreline mask and covariates from the brickman database. The purpose of the mask is to ensure that all observations are coming from the Gulf of Maine, and the covariates will eventually be used to predict what harbor seal distribution looks like in 2050.
+
+```{r presence and background with covariates}
+>>>>>>> 2fbfc9a16542efd0a557cd080c0f462851e4d51f
 # load data
 coast = read_coastline()
 obs = read_observations(scientificname = "Phoca vitulina")
@@ -55,11 +86,16 @@ db_covariates = brickman_database() |>
 covariates <- read_brickman(db_covariates)
 ```
 
+<<<<<<< HEAD
 Next, the observations are thinned and a bias map is created to mitigate
 any spatial biases present in the data. Background points are used to
 characterize locations without any harbor seal observations.
 
 ``` r
+=======
+Next, the observations are thinned and a bias map is created to mitigate any spatial biases present in the data. Background points are used to characterize locations without any harbor seal observations.
+```{r thinning}
+>>>>>>> 2fbfc9a16542efd0a557cd080c0f462851e4d51f
 # thin the observations to reduce sample bias
 thinned_obs = sapply(month.abb,
                      function(mon){
@@ -82,11 +118,16 @@ nback_avg = mean(all_counts$n) |>
   round()
 ```
 
+<<<<<<< HEAD
 Finally, we take the presence and background points and merge them with
 the covariate brickman data. We can also draw out a random sample,
 selecting one presence and background point per month.
 
 ``` r
+=======
+Finally, we take the presence and background points and merge them with the covariate brickman data. We can also draw out a random sample, selecting one presence and background point per month.
+```{r thinned table with covariates, warning=FALSE}
+>>>>>>> 2fbfc9a16542efd0a557cd080c0f462851e4d51f
 # large table of thinned observations and background points
 obsbkg = sapply(month.abb,
                 function(mon){ 
@@ -119,6 +160,7 @@ subset <- obsbkg_covariates |>
 subset
 ```
 
+<<<<<<< HEAD
     ## Simple feature collection with 24 features and 6 fields
     ## Geometry type: POINT
     ## Dimension:     XY
@@ -146,16 +188,24 @@ observations and the locations of the randomly selected
 presence/background points respectively.
 
 ``` r
+=======
+While the subsetted table is the main output we are after, we can also generate several plots. The following figures show the bias map of all observations and the locations of the randomly selected presence/background points respectively.
+```{r plots}
+>>>>>>> 2fbfc9a16542efd0a557cd080c0f462851e4d51f
 # bias map
 ggplot() +
   geom_stars(data = bias_map, aes(fill = count)) +
   scale_fill_viridis_b(na.value = "transparent") +
   geom_sf(data = coast, col = "orange") + 
   labs(x = "Longitude", y = "Latitude", title = "Bias map using all observations")
+<<<<<<< HEAD
 ```
 ![](assignments/C03_assignment_files/figure-gfm/plots-1.png)
 
 ``` r
+=======
+
+>>>>>>> 2fbfc9a16542efd0a557cd080c0f462851e4d51f
 # plot to visualize the location of points
 ggplot() +
   geom_sf(data = subset,
@@ -167,4 +217,7 @@ ggplot() +
   scale_fill_okabe_ito() + # colorblind friendly
   facet_wrap(~month)
 ```
+<<<<<<< HEAD
 ![](assignments/C03_assignment_files/figure-gfm/plots-2.png)
+=======
+>>>>>>> 2fbfc9a16542efd0a557cd080c0f462851e4d51f
