@@ -16,7 +16,7 @@ db_covariates = brickman_database() |>
          interval == "mon",
          var %in% c("SST", "Tbtm", "SSS")
          )
-covariates <- read_brickman(db_covariates)
+covariates <- read_brickman(db_covariates, add = "depth")
 
 # thin the observations to reduce sample bias
 thinned_obs = sapply(month.abb,
