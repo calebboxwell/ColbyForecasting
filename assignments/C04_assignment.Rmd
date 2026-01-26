@@ -1,0 +1,163 @@
+---
+title: "C04_assignment.Rmd"
+output: github_document
+---
+
+```{r source_setup, warning = FALSE}
+source("/home/cjboxw26/ColbyForecasting/setup.R")
+```
+## Goal
+Currently, our main goal is to compare a variety of models to figure out which one is best able to determine the difference between actual presences of Atlantic herring (Clupea harengus) and background points. This data will later be used to forecast the distribution of Atlantic herring in the years 2055 and 2075.
+
+## Preparing the data
+
+To begin, we need to split the data into two groups: training and testing. The models will be trained using the training data, and then assessed using the testing data. Let's load the data we need:
+```{r load_data}
+cfg = read_configuration(scientificname = "Clupea harengus", version = "v1")
+model_input = read_model_input(scientificname = "Clupea harengus", 
+                               version = "v1",
+                               log_me = c("depth", "Xbtm")) |>
+  dplyr::mutate(month = month_as_number(.data$month)) |>
+  select(all_of(c("class", cfg$keep)))
+```
+
+Next, let's split the data into training and testing groups:
+```{r initial_split}
+model_input_split = spatial_initial_split(model_input, 
+                        prop = 1 / 5,     # 20% for testing
+                        strategy = spatial_block_cv) # see ?spatial_block_cv
+```
+
+We can also visualize this split like so:
+```{r initial_split_plot}
+autoplot(model_input_split)
+```
+
+Next, we split the training data into multiple smaller mini-datasets called folds to further improve the models. Here's a visualization:
+```{r cv_training}
+tr_data = training(model_input_split)
+cv_tr_data <- spatial_block_cv(tr_data,
+  v = 5,     
+  cellsize = grid_cellsize(model_input),
+  offset = grid_offset(model_input) + 0.00001
+)
+autoplot(cv_tr_data)
+```
+
+## Preparing a recipe
+Now that we've loaded and prepared the data, we need to make a "recipe" that essentially tells the models what data to use and the relationship between the variables. This is done by giving the models a row of training data as shown in the following code block:
+
+```{r recipe}
+one_row_of_training_data = dplyr::slice(tr_data,1)
+rec = recipe(one_row_of_training_data, formula = class ~ .)
+```
+
+For us humans, we can use this code to see the various relationships between the variables:
+```{r recipe_summary}
+summary(rec)
+```
+
+## Preparing models workflows
+Next, we need to prepare the workflows for our models. Here we use 4 different models since each one uses a different algorithm and therefore will produce slightly different results. Out goal is to find which one does the best at differentiating presences and background points. In the following code we set up workflows for a generalized mixed model (glm), a random forest (rf), boosted regression trees (gbm), and maximum entropy (maxent) to determine the best hyperparameter values.
+
+```{r make_workflow}
+wflow = workflow_set(
+  
+  preproc = list(default = rec), # not much happening in our preprocessor
+  
+  models = list(                 # but we have 4 models to add
+    
+      # very simple - nothing to tune
+      glm = logistic_reg(
+          mode = "classification") |>
+        set_engine("glm"),
+      
+      # two knobs to tune
+      rf = rand_forest(
+          mtry = tune(),
+          trees = tune(),
+          mode = "classification") |>
+        set_engine("ranger", 
+                   importance = "impurity"),
+      
+      # so many things to tune!
+      btree = boost_tree(
+          mtry = tune(), 
+          trees = tune(), 
+          tree_depth = tune(), 
+          learn_rate = tune(), 
+          loss_reduction = tune(), 
+          stop_iter = tune(),
+          mode = "classification") |>
+        set_engine("xgboost"),
+    
+      # just two again
+      maxent = maxent(
+          feature_classes = tune(),
+          regularization_multiplier = tune(),
+          mode = "classification") |>
+        set_engine("maxnet")
+  )
+)
+```
+
+Next, we tell the models to maximize accuracy
+```{r metrics}
+metrics = sdm_metric_set(yardstick::accuracy)
+```
+
+Finally, since we don't know which of the parameters in the workflow will be most accurate, we're going to let the models tune themselves:
+```{r fit, warning = FALSE}
+wflow <- wflow |>
+  workflow_map("tune_grid",
+    resamples = cv_tr_data, 
+    grid = 3,
+    metrics = metrics, 
+    verbose = TRUE)
+```
+
+This process takes a while, but afterwards we can visualize the various models:
+```{r plot_wflow}
+autoplot(wflow)
+```
+
+## Choosing the best model
+Now that the models have run, lets select and store the best hyperparamters for future modeling:
+```{r select_best}
+model_fits = workflowset_selectomatic(wflow, model_input_split,
+                                  filename = "Clupea-harengus-v1-model_fits",
+                                  path = data_path("models"))
+```
+
+Next, we're going to downsize to a singular model. We're going to use a variety of visualizations to accomplish this, but let's start with some simple summary statistics:
+```{r model_fit_metrics}
+model_fit_metrics(model_fits)
+```
+
+We can also plot confusion matricies, which will give more details on the accuracy of each model.
+```{r model_fit_confmat}
+model_fit_confmat(model_fits)
+```
+
+This accuracy can also be represented by Area Under the Curve (AUC) plots:
+```{r model_fit_roc_auc}
+model_fit_roc_auc(model_fits)
+```
+
+Or, if we want to see which variable was most important for each model, we can do so like this:
+```{r model_fit_vip}
+model_fit_varimp_plot(model_fits)
+```
+
+Since the random forest performed the best out of all the models, let's go ahead and examine the metrics of the best hyperparameters:
+
+```{r rf_metrics}
+rf = model_fits |>
+  filter(wflow_id == "default_rf")
+rf$.metrics[[1]]
+```
+
+Finally, we can also examine relative contribution of each variable influence over it's full range of values via a partial dependence plot:
+```{r pd_plot}
+model_fit_pdp(model_fits, wid = "default_rf", title = "Random Forrest")
+```
